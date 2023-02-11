@@ -1,6 +1,20 @@
-import pygame,sys
+import pygame, os, sys
+from pygame.locals import *
 #health bar & text things
 #nb - pygame rectangles (wheretodraw,color, (x,y,length,width)) :p
+x = 400
+y = 400
+vel = 10
+spell1 = ["Rongaire Balorum Eunarach Vicit Romnia."]
+
+class GetImage():
+    
+    def get_image(sheet, frame, width, height, scale, colour):
+        image = pygame.Surface((width, height)).convert_alpha()
+        image.blit(sheet, (0, 0), ((frame * width), 0, width, height))
+        image = pygame.transform.scale(image, (width * scale, height * scale))
+        image.set_colorkey(colour)
+        return image
 
 class Player(pygame.sprite.Sprite):
     
@@ -8,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__() #inherits sprite
         self.image = pygame.Surface((40,40))
         self.image.fill((240,240,240))
-        self.rect = self.image.get_rect(center = (400,400))
+        self.rect = self.image.get_rect(center = (x,y))
         
         #health variables:
         self.maximum_health = 1000
@@ -21,6 +35,7 @@ class Player(pygame.sprite.Sprite):
     #updates game status every 60ms
     def update(self): 
         self.health()
+        self.movement()
 
     #subtract from player health
     def take_damage(self,damage):
@@ -35,6 +50,22 @@ class Player(pygame.sprite.Sprite):
             self.target_health += health
         if self.target_health >= self.maximum_health:
             self.target_health = self.maximum_health
+
+    def movement(self):
+        keys = pygame.key.get_pressed()
+    
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= vel
+
+        if keys[pygame.K_RIGHT] :
+            self.rect.x += vel
+
+        if keys[pygame.K_UP]:
+            self.rect.y -= vel
+
+        if keys[pygame.K_DOWN]:
+            self.rect.y += vel
+        
 
     #draw health bar
     def health(self):
@@ -61,50 +92,49 @@ class Player(pygame.sprite.Sprite):
         pygame.draw.rect(screen, (255,0,0), health_bar_rect)
         pygame.draw.rect(screen, transition_color, transition_bar_rect)
         pygame.draw.rect(screen,(255,255,255), (10,45, self.health_bar_length,25),4)
-
+        
 #setup
 pygame.init()
 screen = pygame.display.set_mode((800,800))
 clock = pygame.time.Clock()
 player = pygame.sprite.GroupSingle(Player())
+background = pygame.Color(50, 50 ,50)
+sprite_sheet_image = pygame.image.load('spritesheet.png').convert_alpha()
+BLACK = (0,0,0)
+colour = pygame.Color(144, 44, 44)
 
 #text stuff 
-font = pygame.font.SysFont(None, 48)
+font = pygame.font.SysFont(None, 24)
+font1 = pygame.font.SysFont(None, 48)
 text_color = (200,100,50)
 text = ''
-
-goodwords = []
+lst = spell1[0].split
+spell_text = spell1[0]
+run = True
 
 #main game loop
-while True:
+while run:
+    screen.fill(background)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
             pygame.quit()
         #add/sub health on up/down arrow
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                player.sprite.get_health(100)
-            elif event.key == pygame.K_DOWN:
-                player.sprite.take_damage(100)
             #text stuff 
-            elif event.key == pygame.K_BACKSPACE:
+            if event.key == pygame.K_BACKSPACE:
                 if len(text) > 0:
                     text = text[:-1]
             elif pygame.key.name(event.key).isalnum() :
                 text += event.unicode
                # print(text)
-            
 
     #text drawing stuff
-    screen.fill((30,30,30))
     text_surface = font.render(text, True, text_color)
-    screen.blit(text_surface, (50, 100))
-
+    screen.blit(text_surface, (x - 20, y - 50))
+    spell = font1.render(spell_text, True, text_color)
+    screen.blit(spell, (50,700))
     player.draw(screen)
-    
     player.update()
     pygame.display.update()
     clock.tick(30)
-    
-
