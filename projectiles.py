@@ -4,11 +4,11 @@ import pygame,sys,math
 
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self):
+    def __init__(self, startx, starty):
         super().__init__() #inherits sprite
         self.image = pygame.Surface((40,40))
         self.image.fill((240,240,240))
-        self.rect = self.image.get_rect(center = (400,400))
+        self.rect = self.image.get_rect(center = (startx,starty))
         
         #health variables
         self.maximum_health = 1000
@@ -63,31 +63,40 @@ class Player(pygame.sprite.Sprite):
 
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, angle, reverse,clock,nox=True):
+    def __init__(self, angle, reverse,clock,startx, starty,delay=False):
         super().__init__() #inherits sprite
         self.angle = angle
-        self.startx = 400
-        self.starty = 400
-        self.rotate_clock = clock
+        self.startx = startx
+        self.starty = starty
+        self.rotate_clock = 0
+        self.delay_val = clock
+        self.delay = delay
         
-        self.image = pygame.Surface((8,8))
+        self.image = pygame.Surface((10,10))
         self.image.fill((240,0,240))
         self.rect = self.image.get_rect(center = (self.startx,self.starty))
 
         self.angle_change = 1
 
-        self.projectile_xspeed = int(5 * reverse) *nox
+        self.projectile_xspeed = int(3 * reverse)
         self.projectile_yspeed = angle
         
     def update(self):
        self.change_position()
-       self.collision(200)
+      # self.collision(400)
        self.rotate_clock += 1
-       if (self.rotate_clock % 40) == 0 :
-           if self.projectile_yspeed == 10:
+       
+       run = True
+       if self.delay:
+           if self.rotate_clock < self.delay_val:
+               run = False
+           
+       if (self.rotate_clock % 40 == 0) and run :
+           if self.projectile_yspeed == 0:
                  self.angle_change = -1
-           if self.projectile_yspeed == -10:
-                 self.angle_change  = 1  
+           if self.projectile_yspeed == -15:
+                 self.angle_change  = 1
+           #print(self.projectile_yspeed)
            self.projectile_yspeed += self.angle_change 
                 
     def collision(self,radius):
@@ -98,26 +107,45 @@ class Projectile(pygame.sprite.Sprite):
     def reset_position(self):
         self.rect.x = self.startx
         self.rect.y = self.starty
-        
+
     def change_position(self):
-        if self.projectile_xspeed > 0:
-            if  self.rect.x <= 800:
-                self.rect.x += self.projectile_xspeed
-            else:
-                self.reset_position()
-            if  self.rect.y <= 800:
-                self.rect.y += self.projectile_yspeed
-            else:
-                 self.reset_position()
+        if  (self.rect.x >= 800) or (self.rect.y >= 800) or (self.rect.x <= 0) or (self.rect.y <= 0):
+             self.reset_position()
         else:
-            if  self.rect.x >= 0:
-                self.rect.x += self.projectile_xspeed
+            if self.projectile_xspeed > 0:
+                if  self.rect.x <= 800:
+                    self.rect.x += self.projectile_xspeed
+                if  self.rect.y <= 800:
+                   self.rect.y += self.projectile_yspeed
             else:
-                self.reset_position()
-            if  self.rect.y >= 0:
-                self.rect.y += self.projectile_yspeed
-            else:
-                 self.reset_position()
+                if  self.rect.x > 0:
+                    self.rect.x += self.projectile_xspeed
+                if  self.rect.y > 0:
+                    self.rect.y += self.projectile_yspeed
+                
+            
+            
+
+##    def change_position(self):
+##        if self.projectile_xspeed > 0:
+##            if  self.rect.x <= 800:
+##                self.rect.x += self.projectile_xspeed
+##            else:
+##                self.reset_position()
+##            if  self.rect.y <= 800:
+##                self.rect.y += self.projectile_yspeed
+##            else:
+##                 self.reset_position()
+##        else:
+##            if  self.rect.x > 0:
+##                self.rect.x += self.projectile_xspeed
+##            else:
+##                self.reset_position()
+##                
+##            if  self.rect.y > 0:
+##                self.rect.y += self.projectile_yspeed
+##            else:
+##                 self.reset_position()
             
             
         
@@ -125,19 +153,36 @@ class Projectile(pygame.sprite.Sprite):
 pygame.init()
 screen = pygame.display.set_mode((800,800))
 clock = pygame.time.Clock()
-player = pygame.sprite.GroupSingle(Player())
+player = pygame.sprite.GroupSingle(Player(400,400))
 
 
-projectiles = [Projectile(0,1,0) for i in range(20)]
+
+enemy1x = 20
+enemy1y = 780
+
+enemy1 =  pygame.sprite.GroupSingle(Player(enemy1x,enemy1y))
+projectiles = [Projectile(0,1,0,0,0) for i in range(15)]
 for i in range(5):
-    projectiles[i] = pygame.sprite.Group(Projectile(i,1,0))
+    projectiles[i] = pygame.sprite.Group(Projectile(-i,1,0,enemy1x,enemy1y))
+for i in range(4,10):
+    projectiles[i] = pygame.sprite.Group(Projectile(-i,1,40,enemy1x,enemy1y, True))
+for i in range(9,15):
+    projectiles[i] = pygame.sprite.Group(Projectile(-i,1,80,enemy1x,enemy1y, True))
+
+
+enemy2x = 780
+enemy2y = 780
+enemy2 =  pygame.sprite.GroupSingle(Player(enemy2x,enemy2y))
+projectiles2 = [Projectile(0,1,0,0,0) for i in range(15)]
 for i in range(5):
-    projectiles[i+5] = pygame.sprite.Group(Projectile(i,-1,0))
-for i in range(5):
-    projectiles[i+10] = pygame.sprite.Group(Projectile(i,1, 41))
-for i in range(5):
-    projectiles[i+15] = pygame.sprite.Group(Projectile(i,-1,41))
-projectiles.append(pygame.sprite.Group(Projectile(i,-1,41,False)))
+    projectiles2[i] = pygame.sprite.Group(Projectile(-i,-1,0,enemy2x,enemy2y))
+for i in range(4,10):
+    projectiles2[i] = pygame.sprite.Group(Projectile(-i,-1,40,enemy2x,enemy2y,True))
+for i in range(9,15):
+    projectiles2[i] = pygame.sprite.Group(Projectile(-i,-1,80,enemy2x,enemy2y,True))
+
+
+enemies = [enemy1,enemy2]
 #text stuff 
 font = pygame.font.SysFont(None, 48)
 text_color = (200,100,50)
@@ -171,10 +216,17 @@ while True:
     
     player.draw(screen)
     player.update()
+    
+    for enemy in enemies:
+        enemy.draw(screen)
+        enemy.update()
     for projectile in projectiles:
         projectile.draw(screen)
         projectile.update()
-            
+    for projectile in projectiles2:
+       projectile.draw(screen)
+       projectile.update()
+     
     pygame.display.update()
     clock.tick(30)
     
