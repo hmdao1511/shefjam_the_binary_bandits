@@ -131,12 +131,24 @@ player = pygame.sprite.GroupSingle(Player())
 projectiles = [Projectile(0,1,0) for i in range(20)]
 for i in range(5):
     projectiles[i] = pygame.sprite.Group(Projectile(i,1,0))
+    if pygame.sprite.groupcollide(player, projectiles[i], False, True):
+        print("group 1 collided")
+        player.sprite.take_damage(10)
 for i in range(5):
     projectiles[i+5] = pygame.sprite.Group(Projectile(i,-1,0))
+    if pygame.sprite.groupcollide(player, projectiles[i+5], False, True):
+        print("group 2 collided")
+        player.sprite.take_damage(10)
 for i in range(5):
     projectiles[i+10] = pygame.sprite.Group(Projectile(i,1, 41))
+    if pygame.sprite.groupcollide(player, projectiles[i+10], False, True):
+        print("group 3 collided")
+        player.sprite.take_damage(10)
 for i in range(5):
     projectiles[i+15] = pygame.sprite.Group(Projectile(i,-1,41))
+    if pygame.sprite.groupcollide(player, projectiles[i+15], False, True):
+        print("group 4 collided")
+        player.sprite.take_damage(10)
 projectiles.append(pygame.sprite.Group(Projectile(i,-1,41,False)))
 #text stuff 
 font = pygame.font.SysFont(None, 48)

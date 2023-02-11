@@ -53,19 +53,22 @@ class Player(pygame.sprite.Sprite):
 
     def movement(self):
         keys = pygame.key.get_pressed()
-    
+        
         if keys[pygame.K_LEFT]:
-            self.rect.x -= vel
+            if self.rect.x > 0:
+                self.rect.x -= vel
 
         if keys[pygame.K_RIGHT] :
-            self.rect.x += vel
+            if self.rect.x < 760:
+                self.rect.x += vel
 
         if keys[pygame.K_UP]:
-            self.rect.y -= vel
+            if self.rect.y > 0:
+                self.rect.y -= vel
 
         if keys[pygame.K_DOWN]:
-            self.rect.y += vel
-        
+            if self.rect.y < 740:
+                self.rect.y += vel
 
     #draw health bar
     def health(self):
