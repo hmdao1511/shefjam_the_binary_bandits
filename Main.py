@@ -91,22 +91,18 @@ class Player(pygame.sprite.Sprite):
         
         if keys[pygame.K_LEFT]:
             if self.rect.x > 0:
-                print("LEFT presssed")
                 self.rect.x -= vel
 
         if keys[pygame.K_RIGHT] :
             if self.rect.x < 760:
-                print("RIGHT presssed")
                 self.rect.x += vel
 
         if keys[pygame.K_UP]:
             if self.rect.y > 0:
-                print("UP presssed")
                 self.rect.y -= vel
 
         if keys[pygame.K_DOWN]:
             if self.rect.y < 740:
-                print("DOWN presssed")
                 self.rect.y += vel
     
     #draw health bar
@@ -146,7 +142,7 @@ class Projectile(pygame.sprite.Sprite):
         self.delay_val = clock
         self.delay = delay
         
-        self.image = pygame.Surface((10,10))
+        self.image = pygame.Surface((20,20))
         self.image.fill((240,0,240))
         self.rect = self.image.get_rect(center = (self.startx,self.starty))
 
